@@ -172,8 +172,20 @@ def prendi_offerte(tok):
                 # Anche description_lang e lingue
                 lang_str=str(o.get("description_lang",""))+" "+str(o.get("short_description_lang",""))+" "+str(o.get("language",""))
                 is_italia = "IT" in country_str.upper() or "ITAL" in country_str.upper() or "ITALY" in country_str.upper()
-                # IT in alto, gli altri in backup per riempire (MyLead ha solo 3 Giochi IT!)
+                # FILTRO NOME: se il nome finisce con - DE, - PL, - FR, - ES, - VN, - CZ, - SK, - RO, - HU... NON e' italiano!
+                nome_upper=nome.upper()
+                suffissi_stranieri=[" - DE"," - PL"," - FR"," - ES"," - VN"," - CZ"," - SK"," - RO"," - HU"," - BG"," - HR"," - RS"," - UA"," - RU"," - TR"," - BR"," - MX"," - PT"," - NL"," - BE"," - AT"," - CH"," - GR"," - DK"," - SE"," - NO"," - FI"," - LT"," - LV"," - EE"]
+                if any(s in nome_upper for s in suffissi_stranieri):
+                    is_italia=False
+                    # Lo scopriamo dopo se e' App o Gioco, ma lo scartiamo subito per entrambi!
+                    print(f"  SCARTATO (APP o GIOCO) per nome straniero: {nome}")
+                # Se countries e' vuoto ma nome ha suffisso straniero, e' straniero lo stesso!
+                # REGOLA UGUALE PER APP E GIOCHI: se non e' IT, e' backup = da buttare!
+                # Prima lo mettevamo in backup per riempire, ora lo scartiamo per entrambi!
                 is_backup = bool(countries) and not is_italia
+                if is_backup:
+                    print(f"  SCARTATO (APP o GIOCO) non IT: {nome} - paesi: {country_str[:80]}")
+                    continue
                 # Payout da payments
                 pay=0
                 try:
@@ -230,22 +242,14 @@ def prendi_offerte(tok):
             print(f"Dopo pagina {page}: {len(apps)} App IT, {len(giochi)} Giochi IT")
         except Exception as e:
             print(f"Errore pagina {page}: {e}")
-    # Riempi buchi con backup internazionali (funzionano anche in Italia!)
-    apps_backup.sort(key=lambda x: x["payout"], reverse=True)
-    giochi_backup.sort(key=lambda x: x["payout"], reverse=True)
-    for it in giochi_backup:
-        if len(giochi)>=10: break
-        if it["nome"] not in [g["nome"] for g in giochi]:
-            giochi.append(it)
-    for it in apps_backup:
-        if len(apps)>=10: break
-        if it["nome"] not in [a["nome"] for a in apps]:
-            apps.append(it)
+    # NO BACKUP STRANIERO! Solo italiani! Meglio 3 italiani veri che 10 stranieri!
+    # apps_backup e giochi_backup li buttiamo via, non li usiamo piu'!
+    print(f"Backup stranieri scartati: {len(giochi_backup)} giochi, {len(apps_backup)} app straniere NON usate!")
     apps.sort(key=lambda x: x["payout"], reverse=True)
     giochi.sort(key=lambda x: x["payout"], reverse=True)
     # Se Giochi IT < 10, riempi con altre offerte IT non usate (per non lasciare Gioco 2, Gioco 3 vuoti)
     # Lo facciamo cercando tra tutte le offerte IT gia' viste - per ora se mancano, lascia cosi' ma logga
-    print(f"Trovate FINALI: {len(apps)} App (IT + backup), {len(giochi)} Giochi (IT + backup) - backup usati: {len(giochi_backup)} giochi, {len(apps_backup)} app")
+    print(f"Trovate FINALI SOLO ITALIA - UGUALE PER ENTRAMBI: {len(apps)} App IT, {len(giochi)} Giochi IT (stranieri scartati per App e Giochi!)")
     for p in apps[:3]: print(f"  APP IT TOP: {p['nome'][:50]} | {p['payout']}")
     for p in giochi[:3]: print(f"  GIOCO IT TOP: {p['nome'][:50]} | {p['payout']}")
     return apps[:10], giochi[:10]
@@ -264,6 +268,16 @@ def aggiorna_html(nuove_apps, nuovi_giochi):
     # Unisci: nuove prima, poi vecchie, senza duplicati per link
     def unisci(nuove, vecchie):
         out=[]; visti=set()
+        # PULIZIA ARCHIVIO UGUALE PER APP E GIOCHI: butta via i vecchi stranieri gia' salvati prima!
+        suffissi=[" - DE"," - PL"," - FR"," - ES"," - VN"," - CZ"," - SK"," - RO"," - HU"," - BG"," - HR"," - RS"," - UA"," - RU"," - TR"," - BR"," - MX"," - PT"," - NL"," - BE"," - AT"," - CH"," - GR"," - DK"," - SE"," - NO"," - FI"," - LT"," - LV"," - EE"]
+        vecchie_pulite=[]
+        for v in vecchie:
+            n=str(v.get("nome","")).upper()
+            if any(s in n for s in suffissi):
+                print(f"  RIMOSSO da archivio (straniero): {v.get('nome')}")
+                continue
+            vecchie_pulite.append(v)
+        vecchie=vecchie_pulite
         # Mappa vecchie img per link: se nuova non ha img, tieni la vecchia GIUSTA!
         vecchie_per_link={ (v.get("link","") or ""): v.get("img","") for v in vecchie }
         for it in list(nuove)+list(vecchie):
