@@ -64,7 +64,8 @@ def login():
 def prendi_offerte(tok):
     headers={"Authorization": f"Bearer {tok}"}
     apps=[]; giochi=[]; visti=set()
-    # Cerca in 10 pagine (1000 offerte) finche' trova 10 App IT + 10 Giochi IT!
+    apps_backup=[]; giochi_backup=[]
+    # Cerca in 10 pagine (1000 offerte). Prima IT, poi resto mondo per riempire!
     for page in range(1, 11):
         if len(apps)>=10 and len(giochi)>=10:
             break
@@ -116,10 +117,8 @@ def prendi_offerte(tok):
                 # Anche description_lang e lingue
                 lang_str=str(o.get("description_lang",""))+" "+str(o.get("short_description_lang",""))+" "+str(o.get("language",""))
                 is_italia = "IT" in country_str.upper() or "ITAL" in country_str.upper() or "ITALY" in country_str.upper()
-                # Se countries e' vuoto, accetta (alcune offerte sono worldwide)
-                if countries and not is_italia:
-                    continue
-                # Se countries ha IT, ok. Se ha solo altre lingue, salta.
+                # IT in alto, gli altri in backup per riempire (MyLead ha solo 3 Giochi IT!)
+                is_backup = bool(countries) and not is_italia
                 # Payout da payments
                 pay=0
                 try:
@@ -160,19 +159,38 @@ def prendi_offerte(tok):
                 nome_pulito=nome
                 item={"nome":nome_pulito,"link":link,"payout":pay}
                 if is_gioco:
-                    if len(giochi)<10 and nome not in [g["nome"] for g in giochi]:
-                        giochi.append(item)
+                    if is_backup:
+                        if nome not in [g["nome"] for g in giochi_backup]:
+                            giochi_backup.append(item)
+                    else:
+                        if len(giochi)<10 and nome not in [g["nome"] for g in giochi]:
+                            giochi.append(item)
                 else:
-                    if len(apps)<10 and nome not in [a["nome"] for a in apps]:
-                        apps.append(item)
+                    if is_backup:
+                        if nome not in [a["nome"] for a in apps_backup]:
+                            apps_backup.append(item)
+                    else:
+                        if len(apps)<10 and nome not in [a["nome"] for a in apps]:
+                            apps.append(item)
             print(f"Dopo pagina {page}: {len(apps)} App IT, {len(giochi)} Giochi IT")
         except Exception as e:
             print(f"Errore pagina {page}: {e}")
+    # Riempi buchi con backup internazionali (funzionano anche in Italia!)
+    apps_backup.sort(key=lambda x: x["payout"], reverse=True)
+    giochi_backup.sort(key=lambda x: x["payout"], reverse=True)
+    for it in giochi_backup:
+        if len(giochi)>=10: break
+        if it["nome"] not in [g["nome"] for g in giochi]:
+            giochi.append(it)
+    for it in apps_backup:
+        if len(apps)>=10: break
+        if it["nome"] not in [a["nome"] for a in apps]:
+            apps.append(it)
     apps.sort(key=lambda x: x["payout"], reverse=True)
     giochi.sort(key=lambda x: x["payout"], reverse=True)
     # Se Giochi IT < 10, riempi con altre offerte IT non usate (per non lasciare Gioco 2, Gioco 3 vuoti)
     # Lo facciamo cercando tra tutte le offerte IT gia' viste - per ora se mancano, lascia cosi' ma logga
-    print(f"Trovate FINALI: {len(apps)} App IT, {len(giochi)} Giochi IT")
+    print(f"Trovate FINALI: {len(apps)} App (IT + backup), {len(giochi)} Giochi (IT + backup) - backup usati: {len(giochi_backup)} giochi, {len(apps_backup)} app")
     for p in apps[:3]: print(f"  APP IT TOP: {p['nome'][:50]} | {p['payout']}")
     for p in giochi[:3]: print(f"  GIOCO IT TOP: {p['nome'][:50]} | {p['payout']}")
     return apps[:10], giochi[:10]
