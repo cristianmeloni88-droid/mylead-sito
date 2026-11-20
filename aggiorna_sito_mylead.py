@@ -176,9 +176,6 @@ def prendi_offerte(tok):
     for p in apps[:3]: print(f"  APP IT TOP: {p['nome'][:50]} | {p['payout']}")
     for p in giochi[:3]: print(f"  GIOCO IT TOP: {p['nome'][:50]} | {p['payout']}")
     return apps[:10], giochi[:10]
-            except Exception as e:
-                print(f"Errore {ep}: {e}")
-    return [], []
 
 def aggiorna_html(apps, giochi):
     path="index.html"
