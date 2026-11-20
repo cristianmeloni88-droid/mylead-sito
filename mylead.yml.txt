@@ -1,0 +1,26 @@
+name: Aggiorna Sito MyLead - Ogni Ora
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+permissions:
+  contents: write
+jobs:
+  aggiorna:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests
+      - run: python aggiorna_sito_mylead.py
+        env:
+          MYLEAD_USERNAME: ${{ secrets.MYLEAD_USERNAME }}
+          MYLEAD_PASSWORD: ${{ secrets.MYLEAD_PASSWORD }}
+      - run: |
+          git config user.name "Shardan Bot"
+          git config user.email "bot@shardan.it"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Aggiorna 10 App + 10 Giochi da MyLead - Top payout"
+          git push
