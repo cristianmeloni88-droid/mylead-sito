@@ -62,6 +62,7 @@ def login():
     return None
 
 def prendi_offerte(tok):
+    import os as _os, json as _json
     headers={"Authorization": f"Bearer {tok}"}
     apps=[]; giochi=[]; visti=set()
     apps_backup=[]; giochi_backup=[]
@@ -101,6 +102,60 @@ def prendi_offerte(tok):
                 nome=(o.get("name","") or o.get("title","") or "").strip()
                 link=(o.get("preview_url","") or o.get("link","") or o.get("tracking_link","") or o.get("url","") or "").strip()
                 if not nome or not link: continue
+                # LOCANDINA GIUSTA AL POSTO GIUSTO: legata a QUESTA offerta, mai a caso!
+                img=""
+                # 1. PRIMA la tua in locandine.json (vince sempre!)
+                try:
+                    loc_map={}
+                    if _os.path.exists("locandine.json"):
+                        loc_map=_json.load(open("locandine.json",encoding="utf-8"))
+                    # Cerca per nome esatto E per link (cosi' non si scambia mai!)
+                    if nome in loc_map:
+                        img=loc_map[nome]
+                        print(f"  IMG TUA per {nome[:30]} -> {img}")
+                    elif link in loc_map:
+                        img=loc_map[link]
+                        print(f"  IMG TUA per link {nome[:30]} -> {img}")
+                except Exception as e:
+                    print(f"  Errore locandine.json: {e}")
+                if not img:
+                    # Cerca in TUTTI i campi possibili di MyLead, solo se e' un'immagine vera!
+                    def is_img(url):
+                        if not isinstance(url,str): return False
+                        u=url.lower()
+                        return u.startswith("http") and (".jpg" in u or ".jpeg" in u or ".png" in u or ".webp" in u or ".gif" in u or "image" in u or "logo" in u or "icon" in u or "cdn" in u or "media" in u)
+                    for k in ["image","icon","logo","banner","preview_image","previewImage","thumbnail","cover","picture","creative","image_url","icon_url","logo_url","imageUrl","logoUrl","app_icon","appIcon","offer_image"]:
+                        v=o.get(k)
+                        if is_img(v):
+                            img=v; break
+                        if isinstance(v,dict):
+                            for kk in ["url","src","link","href"]:
+                                if is_img(v.get(kk)):
+                                    img=str(v.get(kk)); break
+                            if img: break
+                        if isinstance(v,list) and len(v)>0:
+                            for it2 in v:
+                                if is_img(it2):
+                                    img=it2; break
+                                if isinstance(it2,dict) and is_img(it2.get("url")):
+                                    img=str(it2.get("url")); break
+                            if img: break
+                    # Anche dentro creatives / details / info
+                    if not img:
+                        for kk in ["creatives","details","info","media","assets"]:
+                            vv=o.get(kk)
+                            if isinstance(vv,list):
+                                for c in vv:
+                                    if isinstance(c,dict):
+                                        for k2 in ["url","image","src","link"]:
+                                            if is_img(c.get(k2)):
+                                                img=str(c.get(k2)); break
+                                    if img: break
+                            if img: break
+                    if img:
+                        print(f"  IMG MyLead per {nome[:30]} -> {img[:80]}")
+                    else:
+                        print(f"  NESSUNA IMG per {nome[:30]} -> lascio icona, non metto immagine a caso!")
                 # FILTRO ITALIA! Solo offerte per IT!
                 countries=o.get("countries", [])
                 country_str=""
@@ -157,7 +212,7 @@ def prendi_offerte(tok):
                 is_gioco=any(k in cat for k in ["game","gioco","play","casino","gaming","bet","sport","poker","slot","gambling","scommesse","lottery","bingo","fantasy"])
                 # Pulisci nome: togli " - PL", " - DE" etc. se rimane
                 nome_pulito=nome
-                item={"nome":nome_pulito,"link":link,"payout":pay}
+                item={"nome":nome_pulito,"link":link,"payout":pay,"img":img}
                 if is_gioco:
                     if is_backup:
                         if nome not in [g["nome"] for g in giochi_backup]:
@@ -209,11 +264,16 @@ def aggiorna_html(nuove_apps, nuovi_giochi):
     # Unisci: nuove prima, poi vecchie, senza duplicati per link
     def unisci(nuove, vecchie):
         out=[]; visti=set()
+        # Mappa vecchie img per link: se nuova non ha img, tieni la vecchia GIUSTA!
+        vecchie_per_link={ (v.get("link","") or ""): v.get("img","") for v in vecchie }
         for it in list(nuove)+list(vecchie):
+            # Se questa e' nuova e non ha img, ma la vecchia con stesso link ce l'aveva, tienila!
+            if not it.get("img") and vecchie_per_link.get(it.get("link","")):
+                it=dict(it); it["img"]=vecchie_per_link[it.get("link","")]
             link=(it.get("link","") or "").strip()
             if not link or link=="#" or link in visti: continue
             visti.add(link)
-            out.append({"nome":str(it.get("nome",""))[:80],"link":link})
+            out.append({"nome":str(it.get("nome",""))[:80],"link":link,"img":it.get("img","")})
         return out[:200]  # max 200 per tipo, per non far diventare il sito pesante
     arch["apps"]=unisci(nuove_apps, arch.get("apps",[]))
     arch["giochi"]=unisci(nuovi_giochi, arch.get("giochi",[]))
