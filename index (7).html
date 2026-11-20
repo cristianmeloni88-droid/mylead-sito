@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CACCIATORE DI GIOCHI E APPLICAZIONI</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:linear-gradient(160deg,#000000,#0a0a2e,#0d3b2e,#2b0a4a);background-attachment:fixed;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:14px;min-height:100vh}
+  .top{font-size:13px;color:#00ff66;letter-spacing:2px;margin:6px 0 10px;font-weight:bold}
+  .principale{background:linear-gradient(135deg,#111827,#1e1b4b,#065f46);border:3px solid #00ff66;border-radius:22px;padding:22px 16px;margin:10px auto;max-width:560px;box-shadow:0 0 30px rgba(0,255,102,.45)}
+  .logo{width:100%;max-width:340px;height:auto;border-radius:16px;border:3px solid #00ff66;object-fit:contain;box-shadow:0 0 20px #00ff66;background:#000}
+  h1{font-size:32px;margin:12px 0 4px;background:linear-gradient(90deg,#00ff66,#00e5ff,#ffcc00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sotto{color:#d1d5db;font-size:15px;margin-bottom:10px}
+  .badge{display:inline-block;background:#00ff66;color:#000;font-weight:bold;padding:6px 14px;border-radius:20px;font-size:13px;margin:4px}
+  .badge-blu{background:#00e5ff}
+  .badge-giallo{background:#ffcc00}
+  .desc{background:rgba(255,255,255,.08);border-radius:14px;padding:12px;margin:14px 0;font-size:14px;line-height:1.6}
+  .btn{display:inline-block;padding:13px 24px;border-radius:25px;text-decoration:none;font-weight:bold;margin:6px;font-size:15px}
+  .btn-tg{background:#0088cc;color:#fff;box-shadow:0 4px 0 #005580}
+  .btn-tt{background:#fff;color:#000;box-shadow:0 4px 0 #aaa}
+  .mini{font-size:12px;color:#9ca3af;margin-top:10px}
+  .secondaria{border-radius:22px;padding:18px 14px;margin:16px auto;max-width:560px}
+  .app-box{background:linear-gradient(135deg,#0ea5e9,#2563eb,#7c3aed);border:3px solid #38bdf8;box-shadow:0 0 22px rgba(56,189,248,.45)}
+  .giochi-box{background:linear-gradient(135deg,#f97316,#ef4444,#a21caf);border:3px solid #fb923c;box-shadow:0 0 22px rgba(251,146,60,.45)}
+  .secondaria h2{font-size:26px;margin-bottom:4px}
+  .secondaria .sottotitolo{font-size:13px;opacity:.9;margin-bottom:12px}
+  .card{background:rgba(255,255,255,.95);color:#111;border-radius:14px;padding:12px;margin:10px 0;text-align:left;display:flex;gap:12px;align-items:center}
+  .card-info{flex:1;min-width:0}
+  .card b{font-size:18px}
+  .locandina{width:84px;height:84px;min-width:84px;object-fit:cover;border-radius:12px;background:#eee;display:block;border:2px solid #eee}
+  .locandina-fallback{width:84px;height:84px;min-width:84px;border-radius:12px;background:linear-gradient(135deg,#111827,#065f46);display:flex;align-items:center;justify-content:center;font-size:38px;flex-shrink:0}
+  .card .tag{display:inline-block;background:#111;color:#fff;font-size:11px;padding:4px 8px;border-radius:10px;margin-bottom:6px}
+  .card p{color:#555;font-size:13px;margin:6px 0 10px}
+  .btn-verde{background:linear-gradient(90deg,#00ff66,#00ccff);color:#000;padding:10px 18px;border-radius:20px;text-decoration:none;font-weight:bold;display:inline-block;font-size:14px}
+  .btn-arancio{background:linear-gradient(90deg,#ffcc00,#ff6b00);color:#000;padding:10px 18px;border-radius:20px;text-decoration:none;font-weight:bold;display:inline-block;font-size:14px}
+  .nav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:16px 0 4px}
+  .nav-btn{background:#fff;color:#111;border:none;padding:12px 18px;border-radius:22px;font-weight:bold;font-size:15px;cursor:pointer;box-shadow:0 3px 0 #aaa}
+  .nav-btn:disabled{opacity:.35;cursor:default;box-shadow:none}
+  .nav-info{font-size:13px;font-weight:bold;background:rgba(0,0,0,.35);padding:8px 12px;border-radius:16px}
+  .footer{color:#aaa;font-size:12px;margin:20px 0;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="top">✦ SHARDANFIGHTER AFFILIATES ✦</div>
+<div class="principale">
+  <img class="logo" src="Meta_AI_916953475_1358533226248945_6687323588161160706_n_20261120_165054.webp" alt="CacciatoreDiOfferte">
+  <h1>CACCIATORE DI GIOCHI E APPLICAZIONI</h1>
+  <div class="sotto">App e Giochi - di Shardan 🏹</div>
+  <span class="badge">🔥 <span id="totale">20</span> SCELTE - APP + GIOCHI</span>
+  <span class="badge badge-blu">✦ NUOVO OGNI ORA</span>
+  <span class="badge badge-giallo">⭐ ARCHIVIO SEMPRE QUI</span>
+  <div class="desc">Benvenuto nella tana del Cacciatore! 🏹<br>Qui trovi le <b>App</b> e i <b>Giochi</b> che ho scelto per te.<br>Le nuove vanno in alto, le vecchie restano! Usa <b>Successivo ➡️</b> per vedere quelle di prima!<br><b>Io caccio, tu scopri!</b> 💚</div>
+  <a class="btn btn-tg" href="https://t.me/CacciatoreDiOfferte">📱 Telegram - Offerte</a>
+  <a class="btn btn-tt" href="https://www.tiktok.com/@shardanfighter1237">🎵 TikTok - @shardanfighter1237</a>
+  <div class="mini">👇 Scorri giù per App e Giochi 👇</div>
+</div>
+<div class="secondaria app-box">
+  <h2>📱 APP</h2>
+  <div class="sottotitolo">App scelte da Shardan • Le nuove in alto • Aggiornate ogni ora • Le vecchie restano!</div>
+  <div id="app-list"></div>
+  <div class="nav"><button class="nav-btn" id="app-prev" onclick="cambiaPagina('app',-1)">⬅️ Precedente</button><span class="nav-info" id="app-info">Pagina 1</span><button class="nav-btn" id="app-next" onclick="cambiaPagina('app',1)">Successivo ➡️</button></div>
+</div>
+<div class="secondaria giochi-box">
+  <h2>🎮 GIOCHI</h2>
+  <div class="sottotitolo">Giochi scelti da Shardan • I nuovi in alto • Aggiornati ogni ora • I vecchi restano!</div>
+  <div id="giochi-list"></div>
+  <div class="nav"><button class="nav-btn" id="giochi-prev" onclick="cambiaPagina('giochi',-1)">⬅️ Precedente</button><span class="nav-info" id="giochi-info">Pagina 1</span><button class="nav-btn" id="giochi-next" onclick="cambiaPagina('giochi',1)">Successivo ➡️</button></div>
+</div>
+<div class="footer">CacciatoreDiOfferte di Shardan - App e Giochi<br>Le App e i Giochi ti portano sul sito ufficiale del partner.<br>🏹 Buona caccia!</div>
+<script>
+const APPS = /*APPS_JSON*/[];
+const GIOCHI = /*GIOCHI_JSON*/[];
+let pagApp=0, pagGiochi=0; const PER=10;
+function disegna(tipo){
+  const lista = tipo==='app'?APPS:GIOCHI;
+  const pag = tipo==='app'?pagApp:pagGiochi;
+  const box = document.getElementById(tipo==='app'?'app-list':'giochi-list');
+  const start=pag*PER; const pezzi=lista.slice(start,start+PER);
+  box.innerHTML='';
+  pezzi.forEach((it,i)=>{
+    const n=start+i+1;
+    const div=document.createElement('div'); div.className='card';
+    const img = it.img ? `<img class="locandina" src="${it.img}" alt="${it.nome}" loading="lazy" onerror="this.parentElement.querySelector('.locandina-fallback').style.display='flex';this.remove()">` : ``;
+    const fallback = `<div class="locandina-fallback" style="${it.img?'display:none':''}">${tipo==='app'?'📱':'🎮'}</div>`;
+    div.innerHTML = tipo==='app'
+      ? `${img}${fallback}<div class="card-info"><span class="tag">APP • #${n}</span><br><b>${it.nome}</b><p>Scopri l'app scelta da Shardan!</p><a class="btn-verde" href="${it.link}" target="_blank" rel="noopener">👉 Scopri l'App</a></div>`
+      : `${img}${fallback}<div class="card-info"><span class="tag">GIOCO • #${n}</span><br><b>${it.nome}</b><p>Prova il gioco scelto da Shardan!</p><a class="btn-arancio" href="${it.link}" target="_blank" rel="noopener">🎮 Prova il Gioco</a></div>`;
+    box.appendChild(div);
+  });
+  const totale=Math.max(1,Math.ceil(lista.length/PER));
+  document.getElementById(tipo==='app'?'app-info':'giochi-info').textContent=`Pagina ${pag+1} di ${totale} • ${lista.length} totali`;
+  document.getElementById(tipo==='app'?'app-prev':'giochi-prev').disabled = pag===0;
+  document.getElementById(tipo==='app'?'app-next':'giochi-next').disabled = pag>=totale-1;
+  document.getElementById('totale').textContent = APPS.length+GIOCHI.length;
+}
+function cambiaPagina(tipo,dir){
+  if(tipo==='app'){ pagApp=Math.max(0,pagApp+dir); disegna('app'); document.getElementById('app-list').scrollIntoView({behavior:'smooth'}); }
+  else{ pagGiochi=Math.max(0,pagGiochi+dir); disegna('giochi'); document.getElementById('giochi-list').scrollIntoView({behavior:'smooth'}); }
+}
+disegna('app'); disegna('giochi');
+</script>
+</body>
+</html>
