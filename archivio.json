@@ -41,17 +41,27 @@
       "img": "https://static.mylead.global/img/programs/logo/affiliate_programs_37_332171730297586_light.webp"
     },
     {
+      "nome": "British Council",
+      "link": "http://englishonline.britishcouncil.org/",
+      "img": "https://static.mylead.global/img/programs/logo/affiliate_programs_37_354411730297696_light.webp"
+    },
+    {
+      "nome": "Debutify",
+      "link": "https://debutify.com/",
+      "img": "https://static.mylead.global/img/programs/logo/affiliate_programs_37_355911730297713_light.webp"
+    },
+    {
+      "nome": "WinRAR",
+      "link": "https://www.win-rar.com/start.html?&L=0",
+      "img": "https://static.mylead.global/img/programs/logo/affiliate_programs_37_336251730297603_light.webp"
+    }
+  ],
+  "giochi": [
+    {
       "nome": "WinRAR",
       "link": "https://www.win-rar.com/start.html?&L=0",
       "img": "https://static.mylead.global/img/programs/logo/affiliate_programs_37_336251730297603_light.webp"
     },
-    {
-      "nome": "British Council",
-      "link": "http://englishonline.britishcouncil.org/",
-      "img": "https://static.mylead.global/img/programs/logo/affiliate_programs_37_354411730297696_light.webp"
-    }
-  ],
-  "giochi": [
     {
       "nome": "Gamersbase.store",
       "link": "https://gamersbase.store/",
@@ -66,6 +76,31 @@
       "nome": "Adult Games - Smartlink I",
       "link": "w",
       "img": "https://static.mylead.global/img/programs/logo/program_46870_1708690745_opt.webp"
+    },
+    {
+      "nome": "WarThunder - Tutorial",
+      "link": "https://warthunder.com/",
+      "img": "https://static.mylead.global/img/programs/logo/program_484450_1727703987_opt.png"
+    },
+    {
+      "nome": "World of Warships",
+      "link": "https://promo.worldofwarships.eu/glows-54010/eu-en/",
+      "img": "https://static.mylead.global/img/programs/logo/program_501363_1730807335_light.png"
+    },
+    {
+      "nome": "Warner Bros Abu Dhabi",
+      "link": "https://wbworldabudhabi.com/",
+      "img": "https://static.mylead.global/img/programs/logo/affiliate_programs_37_416731739967364_light.png"
+    },
+    {
+      "nome": "Amazon - ScottEdward",
+      "link": "https://www.amazon.com/scottedward",
+      "img": "https://static.mylead.global/img/programs/logo/affiliate_programs_208_1234831748031672_light.png"
+    },
+    {
+      "nome": "SUPERAntiSpyware",
+      "link": "https://www2.superantispyware.com/landing/r1?sc=",
+      "img": "https://static.mylead.global/img/programs/logo/program_524083_1750079238_light.png"
     }
   ]
 }
