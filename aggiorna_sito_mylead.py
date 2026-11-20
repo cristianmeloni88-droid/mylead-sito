@@ -195,25 +195,44 @@ def prendi_offerte(tok):
     for p in giochi[:3]: print(f"  GIOCO IT TOP: {p['nome'][:50]} | {p['payout']}")
     return apps[:10], giochi[:10]
 
-def aggiorna_html(apps, giochi):
-    path="index.html"
-    t=open(path,encoding="utf-8").read()
-    for i, p in enumerate(apps,1):
-        t=re.sub(rf'(<span class="tag">APP • #{i}</span><b>)[^<]+(</b>)', rf'\g<1>{p["nome"][:70]}\g<2>', t)
-    for i, p in enumerate(giochi,1):
-        t=re.sub(rf'(<span class="tag">GIOCO • #{i}</span><b>)[^<]+(</b>)', rf'\g<1>{p["nome"][:70]}\g<2>', t)
-    links=[p["link"] for p in apps]+[p["link"] for p in giochi]
-    idx=0
-    def repl(m):
-        nonlocal idx
-        if idx < len(links):
-            v=f'href="{links[idx]}"'
-            idx+=1
-            return v
-        return m.group(0)
-    t=re.sub(r'href="#"', repl, t)
-    open(path,"w",encoding="utf-8").write(t)
-    print(f"Sito aggiornato! 10 App + 10 Giochi!")
+def aggiorna_html(nuove_apps, nuovi_giochi):
+    # ARCHIVIO: le nuove in alto, le vecchie restano! Mai cancellare!
+    import json as _json, os as _os, re as _re
+    arch_path="archivio.json"
+    arch={"apps":[],"giochi":[]}
+    if _os.path.exists(arch_path):
+        try:
+            arch=_json.load(open(arch_path,encoding="utf-8"))
+        except:
+            arch={"apps":[],"giochi":[]}
+    # Se archivio vuoto ma index.html vecchio ha dati, non serve: partiamo da vuoto
+    # Unisci: nuove prima, poi vecchie, senza duplicati per link
+    def unisci(nuove, vecchie):
+        out=[]; visti=set()
+        for it in list(nuove)+list(vecchie):
+            link=(it.get("link","") or "").strip()
+            if not link or link=="#" or link in visti: continue
+            visti.add(link)
+            out.append({"nome":str(it.get("nome",""))[:80],"link":link})
+        return out[:200]  # max 200 per tipo, per non far diventare il sito pesante
+    arch["apps"]=unisci(nuove_apps, arch.get("apps",[]))
+    arch["giochi"]=unisci(nuovi_giochi, arch.get("giochi",[]))
+    open(arch_path,"w",encoding="utf-8").write(_json.dumps(arch,ensure_ascii=False,indent=2))
+    print(f"Archivio: {len(arch['apps'])} App totali, {len(arch['giochi'])} Giochi totali (vecchie + nuove)!")
+    # Rigenera index.html con i dati dell'archivio
+    t=open("index.html",encoding="utf-8").read()
+    # Se index.html e' quello vecchio (senza /*APPS_JSON*/), usa il nuovo template gia' caricato
+    # Sostituisci i segnaposto con i dati veri
+    apps_json=_json.dumps(arch["apps"],ensure_ascii=False)
+    giochi_json=_json.dumps(arch["giochi"],ensure_ascii=False)
+    # Sostituisci sia i segnaposto vuoti sia eventuali dati vecchi gia' inseriti
+    t=_re.sub(r"/\*APPS_JSON\*/\[.*?\]", f"/*APPS_JSON*/{apps_json}", t, flags=_re.DOTALL)
+    t=_re.sub(r"/\*GIOCHI_JSON\*/\[.*?\]", f"/*GIOCHI_JSON*/{giochi_json}", t, flags=_re.DOTALL)
+    # Fallback: se non c'erano segnaposto (vecchio template), sostituisci il primo [] dopo APPS
+    if "/*APPS_JSON*/" not in t:
+        print("ATTENZIONE: index.html vecchio! Carica il nuovo index.html con i tasti Successivo!")
+    open("index.html","w",encoding="utf-8").write(t)
+    print(f"Sito aggiornato! Pagina 1 = 10 nuove, Successivo = vecchie! Totale {len(arch['apps'])+len(arch['giochi'])}")
 
 if __name__=="__main__":
     tok=login()
