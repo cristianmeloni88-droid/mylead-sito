@@ -23,4 +23,6 @@ jobs:
           git config user.email "bot@shardan.it"
           git add index.html
           git diff --cached --quiet || git commit -m "Aggiorna 10 App + 10 Giochi da MyLead - Top payout"
-          git push
+          # FIX: se nel frattempo hai caricato un file, prima scarica e poi riprova!
+          git pull --rebase || git pull
+          git push || (git pull --rebase && git push)
