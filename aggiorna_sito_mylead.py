@@ -171,13 +171,21 @@ def prendi_offerte(tok):
                     country_str+=str(countries)
                 # Anche description_lang e lingue
                 lang_str=str(o.get("description_lang",""))+" "+str(o.get("short_description_lang",""))+" "+str(o.get("language",""))
-                is_italia = "IT" in country_str.upper() or "ITAL" in country_str.upper() or "ITALY" in country_str.upper()
+                # NUOVA REGOLA PIU' LARGA: IT + Mondiale + Europa = OK per Italia!
+                # Perche' molti Giochi sono mondiali e funzionano anche in Italia!
+                up=country_str.upper()
+                is_italia = ("IT" in up or "ITAL" in up or "ITALY" in up or "WW" in up or "WORLDWIDE" in up or "WORLD" in up or "EU" in up or "EUROPE" in up or "ALL" in up or "GLOBAL" in up)
+                # Se countries e' vuoto = mondiale = OK
+                if not countries:
+                    is_italia=True
                 # FILTRO NOME: se il nome finisce con - DE, - PL, - FR, - ES, - VN, - CZ, - SK, - RO, - HU... NON e' italiano!
                 nome_upper=nome.upper()
                 suffissi_stranieri=[" - DE"," - PL"," - FR"," - ES"," - VN"," - CZ"," - SK"," - RO"," - HU"," - BG"," - HR"," - RS"," - UA"," - RU"," - TR"," - BR"," - MX"," - PT"," - NL"," - BE"," - AT"," - CH"," - GR"," - DK"," - SE"," - NO"," - FI"," - LT"," - LV"," - EE"]
-                if any(s in nome_upper for s in suffissi_stranieri):
+                # Se nome ha - DE / - PL MA countries ha IT, tienilo (e' versione italiana!)
+                # Se nome ha - DE e countries NON ha IT, scarta (e' solo tedesco!)
+                has_it_esplicito = "IT" in up or "ITAL" in up or "ITALY" in up
+                if any(s in nome_upper for s in suffissi_stranieri) and not has_it_esplicito:
                     is_italia=False
-                    # Lo scopriamo dopo se e' App o Gioco, ma lo scartiamo subito per entrambi!
                     print(f"  SCARTATO (APP o GIOCO) per nome straniero: {nome}")
                 # Se countries e' vuoto ma nome ha suffisso straniero, e' straniero lo stesso!
                 # REGOLA UGUALE PER APP E GIOCHI: se non e' IT, e' backup = da buttare!
@@ -257,7 +265,7 @@ def prendi_offerte(tok):
     giochi.sort(key=lambda x: x["payout"], reverse=True)
     # Se Giochi IT < 10, riempi con altre offerte IT non usate (per non lasciare Gioco 2, Gioco 3 vuoti)
     # Lo facciamo cercando tra tutte le offerte IT gia' viste - per ora se mancano, lascia cosi' ma logga
-    print(f"Trovate FINALI SOLO ITALIA - UGUALE PER ENTRAMBI: {len(apps)} App IT, {len(giochi)} Giochi IT (cercate in 3000 offerte, stranieri scartati!)")
+    print(f"Trovate FINALI IT + MONDIALI + EU (compatibili Italia): {len(apps)} App, {len(giochi)} Giochi (cercate in 3000 offerte!)")
     for p in apps[:3]: print(f"  APP IT TOP: {p['nome'][:50]} | {p['payout']}")
     for p in giochi[:3]: print(f"  GIOCO IT TOP: {p['nome'][:50]} | {p['payout']}")
     return apps[:10], giochi[:10]
