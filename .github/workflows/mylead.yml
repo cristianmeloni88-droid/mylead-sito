@@ -14,15 +14,33 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install requests
-      - run: python aggiorna_sito_mylead.py
+      - name: Aggiorna sito da MyLead
+        run: python aggiorna_sito_mylead.py
         env:
           MYLEAD_USERNAME: ${{ secrets.MYLEAD_USERNAME }}
           MYLEAD_PASSWORD: ${{ secrets.MYLEAD_PASSWORD }}
-      - run: |
+      - name: Salva sito su GitHub - SEMPRE VISIBILE
+        run: |
+          echo "=== Controllo file dopo aggiornamento ==="
+          ls -lh index.html archivio.json || echo "Manca un file!"
+          echo "--- index.html contiene quante App? ---"
+          grep -o "APPS_JSON" index.html | wc -l
+          grep -o "https://" index.html | wc -l
+          echo "--- git status ---"
+          git status --short
           git config user.name "Shardan Bot"
           git config user.email "bot@shardan.it"
           git add index.html archivio.json
-          git diff --cached --quiet || git commit -m "Aggiorna 10 App + 10 Giochi da MyLead - Top payout"
-          # FIX: se nel frattempo hai caricato un file, prima scarica e poi riprova!
-          git pull --rebase || git pull
-          git push || (git pull --rebase && git push)
+          echo "--- File da salvare ---"
+          git status --short
+          git diff --cached --stat || echo "Nessuna modifica?"
+          if git diff --cached --quiet; then
+            echo "NESSUNA MODIFICA - sito gia' aggiornato, niente da salvare"
+          else
+            git commit -m "Aggiorna 10 App + 10 Giochi da MyLead - Top payout"
+            echo "Commit fatto!"
+          fi
+          git pull --rebase || git pull || true
+          git push
+          echo "PUSH FATTO! Controlla il sito tra 1 minuto!"
+          
