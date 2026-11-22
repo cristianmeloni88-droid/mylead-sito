@@ -3,7 +3,7 @@ SHARDAN - MyLead -> Sito: 10 App + 10 Giochi OGNI ORA, i piu pagati in alto!
 FIX TOKEN: cerca il token in TUTTI i campi possibili!
 """
 import os, re, requests, json
-BASE="https://api.mylead.global/api/external/v1"
+BASE="https://api.my_lead.global/api/external/v1"  # FIX 22 NOV SERA: con _ come da doc ufficiale!
 
 def trova_token(data):
     # Cerca il token in tutti i campi possibili, anche annidati!
@@ -48,6 +48,8 @@ def login():
                     continue
                 print(f"Chiavi risposta login: {list(data.keys()) if isinstance(data,dict) else type(data)}")
                 tok=trova_token(data)
+                if tok and tok.lower().startswith("bearer "):
+                    tok=tok[7:].strip()
                 if tok:
                     print(f"Login OK! Token preso! Lunghezza: {len(tok)}")
                     return tok
@@ -63,15 +65,28 @@ def login():
 
 def prendi_offerte(tok):
     import os as _os, json as _json
-    headers={"Authorization": f"Bearer {tok}"}
+    headers={"Authorization": f"Bearer {tok}", "Accept": "application/json", "User-Agent": "ShardanBot/1.0"}
     apps=[]; giochi=[]; visti=set()
     apps_backup=[]; giochi_backup=[]
     # Cerca in 10 pagine (1000 offerte). Prima IT, poi resto mondo per riempire!
+    # FIX 22 NOV SERA: endpoint ufficiale da screenshot = /campagna (italiano), non /campaigns!
+    # Proviamo prima /campagna, se da 404 proviamo /campaigns
+    endpoint_campagna = "/campagna"
+    try:
+        _test = requests.get(f"{BASE}/campagna?page=1&limit=1", headers=headers, timeout=15)
+        print(f"Test endpoint /campagna -> {_test.status_code}")
+        if _test.status_code == 404:
+            endpoint_campagna = "/campaigns"
+            print("Uso endpoint vecchio /campaigns")
+        else:
+            print("Uso endpoint UFFICIALE /campagna!")
+    except Exception as _e:
+        print(f"Test endpoint fallito: {_e}, uso /campagna")
     for page in range(1, 31):  # 30 pagine = 3000 offerte! Cerca piu' Giochi IT!
         if len(apps)>=10 and len(giochi)>=10:
             break
         try:
-            r=requests.get(f"{BASE}/campaigns?page={page}&limit=100", headers=headers, timeout=20)
+            r=requests.get(f"{BASE}{endpoint_campagna}?page={page}&limit=100", headers=headers, timeout=20)
             print(f"GET /campaigns?page={page}&limit=100 -> {r.status_code}")
             if r.status_code!=200:
                 print(f"Risposta: {r.text[:200]}")
