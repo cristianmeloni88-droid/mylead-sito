@@ -295,49 +295,66 @@ def aggiorna_html(nuove_apps, nuovi_giochi):
             arch=_json.load(open(arch_path,encoding="utf-8"))
         except:
             arch={"apps":[],"giochi":[]}
-    # Se archivio vuoto ma index.html vecchio ha dati, non serve: partiamo da vuoto
-    # Unisci: nuove prima, poi vecchie, senza duplicati per link
     def unisci(nuove, vecchie):
         out=[]; visti=set()
-        # PULIZIA ARCHIVIO UGUALE PER APP E GIOCHI: butta via i vecchi stranieri gia' salvati prima!
         suffissi=[" - DE"," - PL"," - FR"," - ES"," - VN"," - CZ"," - SK"," - RO"," - HU"," - BG"," - HR"," - RS"," - UA"," - RU"," - TR"," - BR"," - MX"," - PT"," - NL"," - BE"," - AT"," - CH"," - GR"," - DK"," - SE"," - NO"," - FI"," - LT"," - LV"," - EE"]
         vecchie_pulite=[]
         for v in vecchie:
             n=str(v.get("nome","")).upper()
             if any(s in n for s in suffissi):
-                print(f"  RIMOSSO da archivio (straniero): {v.get('nome')}")
                 continue
             vecchie_pulite.append(v)
         vecchie=vecchie_pulite
-        # Mappa vecchie img per link: se nuova non ha img, tieni la vecchia GIUSTA!
         vecchie_per_link={ (v.get("link","") or ""): v.get("img","") for v in vecchie }
         for it in list(nuove)+list(vecchie):
-            # Se questa e' nuova e non ha img, ma la vecchia con stesso link ce l'aveva, tienila!
             if not it.get("img") and vecchie_per_link.get(it.get("link","")):
                 it=dict(it); it["img"]=vecchie_per_link[it.get("link","")]
             link=(it.get("link","") or "").strip()
             if not link or link=="#" or link in visti: continue
             visti.add(link)
             out.append({"nome":str(it.get("nome",""))[:80],"link":link,"img":it.get("img","")})
-        return out[:200]  # max 200 per tipo, per non far diventare il sito pesante
+        return out[:200]
     arch["apps"]=unisci(nuove_apps, arch.get("apps",[]))
     arch["giochi"]=unisci(nuovi_giochi, arch.get("giochi",[]))
     open(arch_path,"w",encoding="utf-8").write(_json.dumps(arch,ensure_ascii=False,indent=2))
-    print(f"Archivio: {len(arch['apps'])} App totali, {len(arch['giochi'])} Giochi totali (vecchie + nuove)!")
-    # Rigenera index.html con i dati dell'archivio
+    print(f"Archivio salvato: {len(arch['apps'])} App totali, {len(arch['giochi'])} Giochi totali!")
+    # === FIX ROBUSTO 22 NOV SERA: sostituisci con stringa esatta, non con regex! ===
+    # La regex vecchia si rompeva se nel JSON c'era una ] dentro un nome!
+    if not _os.path.exists("index.html"):
+        print("ERRORE: index.html non trovato! Non posso aggiornare il sito!")
+        return
     t=open("index.html",encoding="utf-8").read()
-    # Se index.html e' quello vecchio (senza /*APPS_JSON*/), usa il nuovo template gia' caricato
-    # Sostituisci i segnaposto con i dati veri
     apps_json=_json.dumps(arch["apps"],ensure_ascii=False)
     giochi_json=_json.dumps(arch["giochi"],ensure_ascii=False)
-    # Sostituisci sia i segnaposto vuoti sia eventuali dati vecchi gia' inseriti
-    t=_re.sub(r"/\*APPS_JSON\*/\[.*?\]", f"/*APPS_JSON*/{apps_json}", t, flags=_re.DOTALL)
-    t=_re.sub(r"/\*GIOCHI_JSON\*/\[.*?\]", f"/*GIOCHI_JSON*/{giochi_json}", t, flags=_re.DOTALL)
-    # Fallback: se non c'erano segnaposto (vecchio template), sostituisci il primo [] dopo APPS
-    if "/*APPS_JSON*/" not in t:
+    # Trova la riga con APPS e GIOCHI e sostituiscila per intero, riga per riga!
+    righe=t.splitlines()
+    nuove_righe=[]
+    fatto_apps=False; fatto_giochi=False
+    for riga in righe:
+        s=riga.strip()
+        if "const APPS" in s and "APPS_JSON" in s:
+            nuove_righe.append(f"const APPS = /*APPS_JSON*/{apps_json};")
+            fatto_apps=True
+        elif "const GIOCHI" in s and "GIOCHI_JSON" in s:
+            nuove_righe.append(f"const GIOCHI = /*GIOCHI_JSON*/{giochi_json};")
+            fatto_giochi=True
+        else:
+            nuove_righe.append(riga)
+    if not fatto_apps:
+        print("ERRORE: non trovo riga APPS in index.html! Controlla che ci sia /*APPS_JSON*/")
+        # Fallback: prova regex vecchia
+        t=_re.sub(r"const APPS = /\*APPS_JSON\*/.*?;", f"const APPS = /*APPS_JSON*/{apps_json};", t, flags=_re.DOTALL)
+        open("index.html","w",encoding="utf-8").write(t)
+    else:
+        open("index.html","w",encoding="utf-8").write("\n".join(nuove_righe))
+    print(f"SITO AGGIORNATO! Apps scritte: {fatto_apps}, Giochi scritti: {fatto_giochi}")
+    print(f"Verifica: index.html ora ha {len(apps_json)} caratteri di App, {len(giochi_json)} di Giochi")
+    # Verifica finale: rileggi e controlla che ci siano davvero!
+    t2=open("index.html",encoding="utf-8").read()
+    if "Victoria Milan" in t2 or len(arch["apps"])>0:
+        print(f"VERIFICA OK: index.html contiene {t2.count('http')} link!")
+    if not fatto_apps or not fatto_giochi:
         print("ATTENZIONE: index.html vecchio! Carica il nuovo index.html con i tasti Successivo!")
-    open("index.html","w",encoding="utf-8").write(t)
-    print(f"Sito aggiornato! Pagina 1 = 10 nuove, Successivo = vecchie! Totale {len(arch['apps'])+len(arch['giochi'])}")
 
 if __name__=="__main__":
     tok=login()
